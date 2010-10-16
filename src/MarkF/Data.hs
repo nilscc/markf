@@ -22,16 +22,16 @@ data MarkUp
     = Text                  T.Text
     | Html                  B.Html
 
-    -- mark ups
-    | Headline      Int     MarkF       -- Int: Level (1 = highest, 6 = lowest)
-    | Style         Style   MarkF
+    -- mark up
+    | Headline      Int     MarkUp      -- Int: Level (1 = highest, 6 = lowest)
+    | Style         Style   MarkUp
     | Line                              -- -> <hr /> tag in HTML
 
     -- span elements
-    | List          LstNum  [MarkF]
-    | Quote                 MarkF
+    | List          LstNum  [MarkUp]
+    | Quote                 MarkUp
     | Code          Hlight  T.Text
-    | Link          Lnk     MarkF
+    | Link          Lnk     MarkUp
     | LinkName      T.Text  Url         -- link references
 
 data Style

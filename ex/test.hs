@@ -1,6 +1,3 @@
-
-module MarkF.Test where
-
 import Test.QuickCheck
 import Test.QuickCheck.Monadic
 

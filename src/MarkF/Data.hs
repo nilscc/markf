@@ -6,7 +6,6 @@ import qualified Data.Text  as T
 import qualified Text.Blaze as B
 
 type Source   = [MarkF]
-type Document = [MarkUp]
 
 data MarkF
     = MarkUp        MarkUp
@@ -16,23 +15,25 @@ data MarkF
 -- * Markup
 --
 
+type Document = [MarkUp]
+
 data MarkUp
 
     -- "primitives"
-    = Text                  T.Text
-    | Html                  B.Html
+    = Text                          T.Text
+    | Html                          B.Html
 
     -- mark up
-    | Headline      Int     MarkUp      -- Int: Level (1 = highest, 6 = lowest)
-    | Style         Style   MarkUp
-    | Line                              -- -> <hr /> tag in HTML
+    | Headline      Int             MarkUp      -- Int: Level (1 = highest, 6 = lowest)
+    | Style         Style           MarkUp
+    | Line                                      -- -> <hr /> tag in HTML
 
     -- span elements
-    | List          LstNum  [MarkUp]
-    | Quote                 MarkUp
-    | Code          Hlight  T.Text
-    | Link          Lnk     MarkUp
-    | LinkName      T.Text  Url         -- link references
+    | List          LstNum          [MarkUp]
+    | Quote                         [MarkUp]
+    | Code          Hlight          T.Text
+    | Link          Lnk             MarkUp
+    | Image         Lnk     String  MarkUp
 
 data Style
     = StyleStrong
@@ -49,7 +50,6 @@ type Url    = T.Text
 
 data Lnk
     = LnkUrl        Url
-    | LnkImg        Url     (Maybe T.Text)    -- alt text
     | LnkName       T.Text
 
 type Name = T.Text

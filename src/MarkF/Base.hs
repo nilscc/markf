@@ -52,18 +52,6 @@ onP :: Selector a
     -> (a -> a)
     -> Position a
     -> Position a
-onP s f (Position p c n) = Position (on p) (mf c) (on n)
+onP s f (Position p c n) = Position (map mf p) (mf c) (map mf n)
   where
-    on i = case i of (x:xs) -> conc $ walk (Position [] x xs)
-                     _      -> []
-
     mf cur = if s cur then f cur else cur
-
-    walk (Position p c (n:ns)) =
-        walk $ Position (p ++ [mf c]) n ns
-
-    walk (Position p c []) =
-        Position p (mf c) []
-
-    conc :: Position a -> [a]
-    conc (Position a b c) = a ++ [b] ++ c

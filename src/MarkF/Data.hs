@@ -1,9 +1,18 @@
+{-# LANGUAGE RankNTypes #-}
+
 module MarkF.Data where
 
 import qualified Data.Text  as T
 import qualified Text.Blaze as B
 
+type Source   = [MarkF]
+type Document = [MarkUp]
+
 data MarkF
+    = MarkUp        MarkUp
+    -- | Expression    Core
+
+data MarkUp
 
     -- "primitives"
     = Text                  T.Text
@@ -11,19 +20,19 @@ data MarkF
 
     -- mark ups
     | Headline      Int     MarkF       -- Int: Level (1 = highest, 6 = lowest)
-    | Markup        MrkUp   MarkF
-    | List          LstNum  [MarkF]
-    | Quote                 MarkF
-    | Code          Hlight  T.Text
+    | Style         Style   MarkF
     | Line                              -- -> <hr /> tag in HTML
 
     -- span elements
+    | List          LstNum  [MarkF]
+    | Quote                 MarkF
+    | Code          Hlight  T.Text
     | Link          Lnk     MarkF
-    | LinkName      T.Text  Url
+    | LinkName      T.Text  Url         -- link references
 
-data MrkUp
-    = MrkUpStrong
-    | MrkUpEmph
+data Style
+    = StyleStrong
+    | StyleEmph
 
 data LstNum
     = LstStar
@@ -38,3 +47,41 @@ data Lnk
     = LnkUrl        Url
     | LnkImg        Url     (Maybe T.Text)    -- alt text
     | LnkName       T.Text
+
+type Name = T.Text
+
+
+--------------------------------------------------------------------------------
+-- Expressions
+
+{- TODO:
+
+data Core
+    = VarC          Name
+    | LitC          Literal
+    | AppC          Func        [Core]
+    | LetC          [LetCore]
+
+data LetCore
+    = LetCore       Name        Core
+
+data Literal
+    = NoLit
+    | LitText       T.Text
+    | LitList       [Literal]
+
+data Func
+    = FuncNoArg     Core
+    | FuncArg       (Core -> Func)
+
+-}
+
+--------------------------------------------------------------------------------
+-- Positions
+
+data Position a = Position
+    { posPrev           :: [a]
+    , posCur            :: a
+    , posNext           :: [a]
+    }
+  deriving (Eq, Show)

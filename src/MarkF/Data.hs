@@ -12,6 +12,10 @@ data MarkF
     = MarkUp        MarkUp
     -- | Expression    Core
 
+--------------------------------------------------------------------------------
+-- * Markup
+--
+
 data MarkUp
 
     -- "primitives"
@@ -52,7 +56,8 @@ type Name = T.Text
 
 
 --------------------------------------------------------------------------------
--- Expressions
+-- * Expressions
+--
 
 {- TODO:
 
@@ -77,7 +82,8 @@ data Func
 -}
 
 --------------------------------------------------------------------------------
--- Positions
+-- * Positions
+--
 
 data Position a = Position
     { posPrev           :: [a]

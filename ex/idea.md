@@ -61,12 +61,6 @@ For example "let" expressions:
     $(let result = sin 1)
     Sinus of 1 is $result.
 
-Or conditionals:
-
-    $(if version == 1)
-    This is version 1.
-    $end
-
 And cool stuff like:
 
     $(next code (highlight "haskell"))

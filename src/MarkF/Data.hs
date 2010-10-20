@@ -2,47 +2,73 @@
 
 module MarkF.Data where
 
+import Control.Monad.State
+import Control.Monad.Error
+
+import qualified Data.Map   as M
 import qualified Data.Text  as T
 import qualified Text.Blaze as B
 
-type Source   = [MarkF]
+type Source   = [SrcMarkUp]
 
-data MarkF
-    = MarkUp        MarkUp
-    -- | Expression    Core
+-- | The "markup" source language representation, including expressions.
+data SrcMarkUp
+
+    -- "primitives"
+    = SrcText                      T.Text
+    | SrcHtml                      B.Html
+
+    -- mark up
+    | SrcHeadline      Int         [SrcMarkUp]    -- Int: Level (1 = highest, 6 = lowest)
+    | SrcParagraph                 [SrcMarkUp]
+    | SrcStyle         Style       [SrcMarkUp]
+    | SrcLine                                  -- -> <hr /> tag in HTML
+
+    -- span elements
+    | SrcList          LstNum      [SrcMarkUp]
+    | SrcQuote                     [SrcMarkUp]
+    | SrcCode          Hlight      T.Text
+    | SrcLink          Lnk         [SrcMarkUp]
+    | SrcImage         Lnk         T.Text
+    | Expressions                  [Exp]
+
 
 --------------------------------------------------------------------------------
 -- * Markup
 --
 
+-- Two type synonyms - just to keep track of what we've done so far.
 type Document = [MarkUp]
 
+-- | This is exactly the same markup representation as SrcMarkUp without
+-- expressions
 data MarkUp
 
     -- "primitives"
-    = Text                          T.Text
-    | Html                          B.Html
+    = Text                      T.Text
+    | Html                      B.Html
 
     -- mark up
-    | Headline      Int             MarkUp      -- Int: Level (1 = highest, 6 = lowest)
-    | Style         Style           MarkUp
-    | Line                                      -- -> <hr /> tag in HTML
+    | Headline      Int         [MarkUp]    -- Int: Level (1 = highest, 6 = lowest)
+    | Paragraph                 [MarkUp]
+    | Style         Style       [MarkUp]
+    | Line                                  -- -> <hr /> tag in HTML
 
     -- span elements
-    | List          LstNum          [MarkUp]
-    | Quote                         [MarkUp]
-    | Code          Hlight          T.Text
-    | Link          Lnk             MarkUp
-    | Image         Lnk     String  MarkUp
+    | List          LstNum      [MarkUp]
+    | Quote                     [MarkUp]
+    | Code          Hlight      T.Text
+    | Link          Lnk         [MarkUp]
+    | Image         Lnk         T.Text
+
 
 data Style
     = StyleStrong
     | StyleEmph
 
 data LstNum
-    = LstStar
+    = LstUnsorted
     | LstSorted
-    | LstChar       Char
 
 type Hlight = Maybe T.Text
 
@@ -50,7 +76,7 @@ type Url    = T.Text
 
 data Lnk
     = LnkUrl        Url
-    | LnkName       T.Text
+    -- | LnkName       T.Text
 
 type Name = T.Text
 
@@ -59,35 +85,43 @@ type Name = T.Text
 -- * Expressions
 --
 
-{- TODO:
+data Exp
+    = VarE              Id
+    | LitE              Literal
+    | AppE          Id  [Exp]
+    -- TODO:
+    -- | LetE              [LetExp]
 
-data Core
-    = VarC          Name
-    | LitC          Literal
-    | AppC          Func        [Core]
-    | LetC          [LetCore]
+type Id = T.Text
 
-data LetCore
-    = LetCore       Name        Core
+data LetExp
+    = LetExp        Id  Exp
 
 data Literal
-    = NoLit
-    | LitText       T.Text
-    | LitList       [Literal]
+    = LitText           T.Text
+    | LitBool           Bool
+    | LitInt            Integer
+    | LitFloat          Float
 
-data Func
-    = FuncNoArg     Core
-    | FuncArg       (Core -> Func)
+type Lookup = M.Map Id Func
 
--}
+newtype Func = Func ([Exp] -> EvalT ())
+
+
+data EvalState = EvalState
+    { lkup      :: Lookup
+    , position  :: Position SrcMarkUp
+    }
+
+type EvalT a = ErrorT String (StateT EvalState IO) a
 
 --------------------------------------------------------------------------------
 -- * Positions
 --
 
 data Position a = Position
-    { posPrev           :: [a]
+    { posUp             :: Maybe (Position a)
+    , posPrev           :: [a]
     , posCur            :: a
     , posNext           :: [a]
     }
-  deriving (Eq, Show)

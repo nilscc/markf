@@ -103,10 +103,7 @@ data Literal
     | LitInt            Integer
     | LitFloat          Float
 
-type Lookup = M.Map Id Func
-
-newtype Func = Func ([Exp] -> EvalT ())
-
+type Lookup = M.Map Id LocatedFunc
 
 data EvalState = EvalState
     { lkup      :: Lookup
@@ -125,3 +122,12 @@ data Position a = Position
     , posCur            :: a
     , posNext           :: [a]
     }
+
+
+--------------------------------------------------------------------------------
+-- * EvalT functions
+
+newtype Func        = Func  ([Exp] -> SrcMarkUp -> SrcMarkUp)
+newtype LocatedFunc = LFunc ([Exp] -> EvalT ())
+
+type Selector = SrcMarkUp -> Bool
